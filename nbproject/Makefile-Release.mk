@@ -21,7 +21,7 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=MinGW_1-Windows
+CND_PLATFORM=MinGW-Windows
 CND_DLIB_EXT=dll
 CND_CONF=Release
 CND_DISTDIR=dist
@@ -67,13 +67,13 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibvdf.a: ${OBJECTFILES}
 
 ${OBJECTDIR}/vdblock.o: vdblock.c 
 	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/vdblock.o vdblock.c
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/vdblock.o vdblock.c
 
 ${OBJECTDIR}/vdfile.o: vdfile.c 
 	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/vdfile.o vdfile.c
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/vdfile.o vdfile.c
 
 # Subprojects
 .build-subprojects:

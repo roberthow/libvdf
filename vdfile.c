@@ -82,7 +82,7 @@ int vdf_getheader(VDF_HEADER * const header,FILE * const fp){
 
 /* 打开VDF文件，会检验是否为VDF文件，返回文件指针，如不是VDF文件，返回NULL */
 FILE *vdf_open(const char *filepath){
-    FILE *fp=fopen(filepath,"rw");
+    FILE *fp=fopen(filepath,"r+b");
     
     if(NULL==fp)return fp;
     if(vdf_check(fp)==1)

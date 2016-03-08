@@ -33,6 +33,7 @@
       </toolsSet>
       <compileType>
         <archiverTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libvdf.a</output>
         </archiverTool>
       </compileType>
       <item path="vdblock.c" ex="false" tool="0" flavor2="0">
