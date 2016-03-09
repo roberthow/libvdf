@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include "vdf.h"
@@ -21,14 +22,14 @@ uint64_t _vdf_minfilesize(const uint64_t blocksize){
 }
 
 /* 计算block size */
-uint64_t _vdf_blocksize(const VDF_BLOCKSIZE_FLAG blocksize_flag){
-    return (0x00000001<<blocksize_flag)*256;
-}
+//uint64_t _vdf_blocksize(const VDF_BLOCKSIZE_FLAG blocksize_flag){
+//    return (0x00000001<<blocksize_flag)<<8;// N<<8 means N*256
+//}
 
 /* 初始化文件头 */
 void _vdf_fillheader(const uint64_t filesize, const VDF_BLOCKSIZE_FLAG blocksize_flag, VDF_HEADER* const header){
     char vdf_flag[3] = __VDF_FLAG__;
-    uint64_t blocksize=_vdf_blocksize(blocksize_flag); // per block size
+    uint64_t blocksize=BLOCKSIZE(blocksize_flag); // per block size
     uint64_t batsize=_vdf_batsize(filesize,blocksize); // Block Allocation Table size
     uint64_t blockcount = _vdf_blockcount(filesize,blocksize); //block count
     header->version = __VDF_VERSION__;
@@ -49,7 +50,7 @@ int vdf_create(const uint64_t filesize, const VDF_BLOCKSIZE_FLAG blocksize_flag,
     VDF_HEADER fheader;
     FILE *fp;
     _vdf_fillheader(filesize, blocksize_flag, &fheader);
-    uint64_t blocksize=_vdf_blocksize(fheader.bsizeflag);
+    uint64_t blocksize=BLOCKSIZE(fheader.bsizeflag);
     uint64_t batsize=_vdf_batsize(filesize,blocksize);
     uint8_t c=0;
     
@@ -81,61 +82,33 @@ int vdf_getheader(VDF_HEADER * const header,FILE * const fp){
 }
 
 /* 打开VDF文件，会检验是否为VDF文件，返回文件指针，如不是VDF文件，返回NULL */
-FILE *vdf_open(const char *filepath){
-    FILE *fp=fopen(filepath,"r+b");
+VDF* vdf_open(const char *filepath){
+    VDF *vdf;
+    FILE *fp;
+    fp=fopen(filepath,"r+b");
+    if(NULL==fp)return NULL;
     
-    if(NULL==fp)return fp;
-    if(vdf_check(fp)==1)
-        return fp;
+    vdf=(VDF *)malloc(sizeof(VDF));//分配内存
+    vdf_getheader(&(vdf->header),fp);
+    vdf->blocksize=BLOCKSIZE(vdf->header.bsizeflag);
+    vdf->vdfp=fp;
+    if(vdf_check(vdf)==1)
+        return vdf;
     else{
-        fclose(fp);
+        vdf_close(vdf);
         return NULL;
     } 
 }
 
-void vdf_close(FILE *fp){
-    fclose(fp);
+void vdf_close(VDF *vdf){
+    fclose(vdf->vdfp);
+    free(vdf);
 }
 
 /* 检验是否为VDF文件，如获取到VDF文件头，则返回1，否则返回0*/
-int vdf_check(FILE *fp){
-    VDF_HEADER header;
-    if(vdf_getheader(&header,fp)==E_SUCCESS)
+int vdf_check(VDF *vdf){
+    if(vdf_getheader(&(vdf->header),vdf->vdfp)==E_SUCCESS)
         return 1;
     else
         return 0;
-}
-
-/*@Unperfect*/
-/*向系统配置文件vdf.conf中添加文件*/
-int vdf_addvdf(const char *filepath){
-    FILE *configfp=fopen("vdf.conf","ab");/*以添加方式打开*/
-    if(configfp==NULL)return E_FBADIO;
-    if(access(filepath,F_OK))return E_FBADIO; /*文件不存在*/
-    fwrite(filepath,strlen(filepath),1,configfp);
-    fputc(0xAA,configfp);
-    fclose(configfp);
-    return E_SUCCESS;
-}
-
-/*@Unperfect*/
-/*从系统配置文件vdf.conf中删除文件*/
-int vdf_rmvdf(const char *filepath){
-    
-}
-
-/*@Unperfect*/
-/*从系统配置文件中读取一个vdf文件,并返回一个可读写的文件描述符*/
-FILE * vdf_getvdf(FILE *conf){
-    char f[1000];
-    int i;
-    if(feof(conf))return NULL;
-    for(i=0;i<1000;i++){
-        f[i]=fgetc(conf);
-        if(f[i]==0xAA){
-            f[i]='\0';
-            break;
-        }
-    }
-    return fopen(f,"r+b");
 }

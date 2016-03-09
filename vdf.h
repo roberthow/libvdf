@@ -30,24 +30,44 @@ typedef struct {
     uint64_t bend;     /*block结束位置*/
 } VDF_HEADER;
 
+typedef struct vdf_descriptor {
+    VDF_HEADER header;
+    int blocksize;
+    FILE * vdfp;
+} VDF;
+
+typedef struct bat_node_descriptor{
+    size_t id;
+    size_t offset;//相对于VDF_HEADER.tstart的偏移值
+    uint8_t umask;
+    uint8_t value;
+} BAT_NODE;
+
+typedef struct block_descriptor {
+    VDF vdf;
+    BAT_NODE batnode;
+    size_t offset; //相对于VDF_HEADER.bstart的偏移值,单位是blocksize
+    char *data;
+} BLOCK;
+
 typedef enum {
     bs256b, bs512b, bs1k, bs2k, bs4k, bs8k, bs16k, bs32k, bs64k
 } VDF_BLOCKSIZE_FLAG;
 
+#define BLOCKSIZE(bsflag) (0x00000001<<(bsflag))<<8; /*N<<8 means N*256*/
 #define BLOCK_USE_FLAG(byte,n) byte&( 0x01 << ( (n)-1 ) )
 #define SET_BLOCK_USE_FLAG(byte,n) byte|( 0x01 << ( (n)-1 ) )
 #define UNSET_BLOCK_USE_FLAG(byte,n) byte&(~( 0x01 << ( (n)-1 ) ) )
 
 #define DEFAULT_BLOCK_SIZE BLOCKSIZE_4K
 #define MAX_FILE_SIZE 1024*1024*1024*1024 //2的40次方 =1T 最大文件大小
-#define MAX_FILES 65535
 
 #define HEADER_SIZE sizeof(VDF_HEADER) //常量 文件头大小
 
 int vdf_create(const uint64_t filesize, const VDF_BLOCKSIZE_FLAG blocksize_flag, const char *filepath);
-
-//FILE* vdf_file(const char *filepath);
 int vdf_getheader(VDF_HEADER * const header, FILE * const fp);
+VDF* vdf_open(const char *filepath);
+void vdf_close(VDF *vdf);
 
 #ifdef	__cplusplus
 }
