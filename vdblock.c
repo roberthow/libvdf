@@ -35,7 +35,7 @@ int vdf_bread(void *mp, size_t size, uint64_t blockid, FILE *fp){
     
     if(vdf_getheader(&header,fp)!=E_SUCCESS)return 0;//获取不到文件头，返回0
     //判断需要读出的字节数
-    blocksize=_vdf_blocksize(header.bsizeflag);
+    blocksize=BLOCKSIZE(header.bsizeflag);
     if(size>blocksize)realsize=blocksize;
     
     boffset=blockid*blocksize;
@@ -59,7 +59,7 @@ int vdf_bwrite(void *mp, size_t size, uint64_t blockid, FILE *fp){
     
     if(vdf_getheader(&header,fp)!=E_SUCCESS)return 0;//获取不到文件头，返回0
     //判断需要写入的字节数
-    blocksize=_vdf_blocksize(header.bsizeflag);
+    blocksize=BLOCKSIZE(header.bsizeflag);
     if(size>blocksize)realsize=blocksize;
     
     _vdf_bset(blockid,header,fp);//设置标志位
