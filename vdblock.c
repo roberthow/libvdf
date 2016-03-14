@@ -7,7 +7,7 @@
  */
 int vdf_bwriteable(uint64_t blockid, FILE * const fp){
     VDF_HEADER header;
-    uint64_t offset = blockid/8;
+    uint64_t offset = blockid>>3;
     int nbit = blockid%8+1;
     char flagbyte;
     
