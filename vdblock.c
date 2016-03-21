@@ -110,3 +110,34 @@ int _vdf_bunset(uint64_t blockid,const VDF_HEADER header,FILE *fp){
     fflush(fp);
     return 1;
 }
+
+int vdf_getnodedesc(BAT_NODE * const batnode, size_t blockid, FILE *fp){
+    uint64_t offset=blockid/8;
+    int nbit = blockid%8;
+    char flagbyte;
+    VDF_HEADER header;
+    
+    batnode->id=blockid;
+    batnode->offset=offset;
+    batnode->umask=0x01<<nbit;
+    
+    if(fp==NULL)return 1;
+    vdf_getheader(&header,fp);
+    fseek(fp, header.tstart+offset, SEEK_SET); //定位到标志位
+    flagbyte=fgetc(fp); //获取字节
+    batnode->value=( BLOCK_USE_FLAG(flagbyte,nbit+1) ) >> nbit;
+    
+    return 0;
+}
+
+int vdf_getdesc(VDF * const vdf,  FILE *fp){
+    VDF_HEADER header;
+    
+    if(fp==NULL)return 1;
+    vdf_getheader(&header,fp);
+    vdf->header=header;
+    vdf->blocksize=BLOCKSIZE(header.bsizeflag);
+    vdf->vdfp=fp;
+    
+    return 0;
+}

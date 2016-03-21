@@ -38,16 +38,16 @@ typedef struct vdf_descriptor {
 
 typedef struct bat_node_descriptor{
     size_t id;
-    size_t offset;//相对于VDF_HEADER.tstart的偏移值
-    uint8_t umask;
-    uint8_t value;
+    size_t offset;//相对于VDF_HEADER.tstart的偏移值,单位是byte
+    uint8_t umask;//掩码，bat中1 byte表示8个block,通过掩码才能获取到是否有数据
+    uint8_t value;//1=block已有数据，0=block无数据
 } BAT_NODE;
 
 typedef struct block_descriptor {
     VDF vdf;
     BAT_NODE batnode;
     size_t offset; //相对于VDF_HEADER.bstart的偏移值,单位是blocksize
-    char *data;
+    char *data; //block的数据
 } BLOCK;
 
 typedef enum {
@@ -68,6 +68,8 @@ int vdf_create(const uint64_t filesize, const VDF_BLOCKSIZE_FLAG blocksize_flag,
 int vdf_getheader(VDF_HEADER * const header, FILE * const fp);
 VDF* vdf_open(const char *filepath);
 void vdf_close(VDF *vdf);
+int vdf_bread(void *mp, size_t size, uint64_t blockid, FILE *fp);
+int vdf_getnodedesc(BAT_NODE * const batnode, size_t blockid, FILE *fp);
 
 #ifdef	__cplusplus
 }
