@@ -14,11 +14,11 @@ extern "C" {
 
 #define E_SUCCESS 0
 
-#define E_FMAXLT -101
-#define E_FMINLT -102
-#define E_FEXIST -103
-#define E_FINVAL -104
-#define E_FBADIO -105 
+#define E_FMAXLT 1
+#define E_FMINLT 2
+#define E_FEXIST 3
+#define E_FINVAL 4
+#define E_FBADIO 5 
 
 
 
